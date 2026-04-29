@@ -45,6 +45,10 @@ public class RenderCallback {
         renderQueue.add(block);
     }
 
+    public static int queueSize() {
+        return ((renderQueue.size() + tracerQueue.size()) / 2);
+    }
+
     public static void clearQueue() {
         renderQueue.clear();
     }
