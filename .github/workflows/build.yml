@@ -2,9 +2,11 @@
 # and submitted pull request. This can help catch issues that only occur on
 # certain platforms or Java versions, and provides a first line of defence
 # against bad commits.
-
 name: build
 on: [pull_request, push]
+
+permissions:
+  contents: write
 
 jobs:
   build:
@@ -24,7 +26,11 @@ jobs:
       - name: build
         run: ./gradlew build
       - name: release
-        uses: softprops/action-gh-release@v2
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        uses: softprops/action-gh-release@v2.3.2
         with:
-          files: build/libs/*.jar
-          tag_name: latest
+          files: |
+            build/libs/*.jar
+            !build/libs/*-sources.jar
+          tag_name: nightly
+          prerelease: true
