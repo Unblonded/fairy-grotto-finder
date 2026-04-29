@@ -23,11 +23,8 @@ jobs:
         run: chmod +x ./gradlew
       - name: build
         run: ./gradlew build
-      - name: capture build artifacts
-        uses: actions/upload-artifact@v7
+      - name: release
+        uses: softprops/action-gh-release@v2
         with:
-          name: Artifacts
-          path: |
-                build/libs/
-                !build/libs/*-sources.jar
-
+          files: build/libs/*.jar
+          tag_name: latest
