@@ -28,3 +28,5 @@ jobs:
         with:
           name: Artifacts
           path: build/libs/
+                !build/libs/*-sources.jar
+
