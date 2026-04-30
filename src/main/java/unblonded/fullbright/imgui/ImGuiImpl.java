@@ -42,7 +42,8 @@ public final class ImGuiImpl {
 
         data.getFonts().build();
 
-        ImGuiThemes.cyberpunk();
+        //ImGuiThemes.cyberpunk();
+        //ImGuiThemes.simple();
 
         data.setConfigFlags(ImGuiConfigFlags.DockingEnable);
 

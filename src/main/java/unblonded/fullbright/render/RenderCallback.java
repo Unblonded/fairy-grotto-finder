@@ -10,10 +10,8 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gl.DynamicUniforms;
 import net.minecraft.client.gl.RenderPipelines;
 import net.minecraft.client.option.Perspective;
-import net.minecraft.client.render.BufferBuilder;
-import net.minecraft.client.render.BuiltBuffer;
-import net.minecraft.client.render.Camera;
-import net.minecraft.client.render.Tessellator;
+import net.minecraft.client.render.*;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import org.joml.Matrix4f;
@@ -21,19 +19,23 @@ import org.joml.Matrix4fStack;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
 import org.lwjgl.opengl.GL11;
+import unblonded.fullbright.Config;
 import unblonded.fullbright.Fullbright;
 import unblonded.fullbright.util.Color;
 import unblonded.fullbright.util.PosColor;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.OptionalDouble;
-import java.util.OptionalInt;
+import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 public class RenderCallback {
     private static final List<PosColor> renderQueue = new CopyOnWriteArrayList<>();
     private static final List<PosColor> tracerQueue = new CopyOnWriteArrayList<>();
+
+    public static Color activeColor = new Color("#ff08da");
+
+    public static void setActiveColor(Color color) {
+        activeColor = color;
+    }
 
     public static void addToQueue(PosColor block) {
         for (PosColor pc : renderQueue) {
@@ -55,6 +57,7 @@ public class RenderCallback {
 
     public static void renderBlockOutline() {
         if (renderQueue.isEmpty()) return;
+        if (!Config.showOutlines.get()) return;
         if (MinecraftClient.getInstance().player == null) return;
 
         BufferBuilder bufferBuilder = Tessellator.getInstance().begin(
@@ -67,7 +70,8 @@ public class RenderCallback {
             float x0 = pc.pos.getX(), y0 = pc.pos.getY(), z0 = pc.pos.getZ();
             float x1 = x0 + 1f,      y1 = y0 + 1f,      z1 = z0 + 1f;
 
-            float r = pc.R(), g = pc.G(), b = pc.B(), a = pc.A();
+            //float r = pc.R(), g = pc.G(), b = pc.B(), a = pc.A();
+            float r = activeColor.R(), g = activeColor.G(), b = activeColor.B(), a = activeColor.A();
 
             // bottom face
             addLine(bufferBuilder, x0,y0,z0, x1,y0,z0, r,g,b,a);
@@ -135,6 +139,112 @@ public class RenderCallback {
         }
     }
 
+    public static void renderGlow() {
+        if (renderQueue.isEmpty()) return;
+        MinecraftClient mc = MinecraftClient.getInstance();
+        if (mc.player == null) return;
+
+        BufferBuilder bufferBuilder = Tessellator.getInstance().begin(
+                VertexFormat.DrawMode.QUADS,
+                VertexFormats.POSITION_COLOR
+        );
+
+        for (PosColor pc : renderQueue) {
+            float x0 = pc.pos.getX(), y0 = pc.pos.getY(), z0 = pc.pos.getZ();
+            float x1 = x0 + 1f, y1 = y0 + 1f, z1 = z0 + 1f;
+            //float r = pc.R(), g = pc.G(), b = pc.B(), a = pc.A();
+            float r = activeColor.R(), g = activeColor.G(), b = activeColor.B(), a = activeColor.A();
+
+            // Bottom (Y-)
+            bufferBuilder.vertex(x0, y0, z0).color(r, g, b, a);
+            bufferBuilder.vertex(x1, y0, z0).color(r, g, b, a);
+            bufferBuilder.vertex(x1, y0, z1).color(r, g, b, a);
+            bufferBuilder.vertex(x0, y0, z1).color(r, g, b, a);
+
+            // Top (Y+)
+            bufferBuilder.vertex(x0, y1, z0).color(r, g, b, a);
+            bufferBuilder.vertex(x0, y1, z1).color(r, g, b, a);
+            bufferBuilder.vertex(x1, y1, z1).color(r, g, b, a);
+            bufferBuilder.vertex(x1, y1, z0).color(r, g, b, a);
+
+            // North (Z-)
+            bufferBuilder.vertex(x0, y0, z0).color(r, g, b, a);
+            bufferBuilder.vertex(x0, y1, z0).color(r, g, b, a);
+            bufferBuilder.vertex(x1, y1, z0).color(r, g, b, a);
+            bufferBuilder.vertex(x1, y0, z0).color(r, g, b, a);
+
+            // South (Z+)
+            bufferBuilder.vertex(x0, y0, z1).color(r, g, b, a);
+            bufferBuilder.vertex(x1, y0, z1).color(r, g, b, a);
+            bufferBuilder.vertex(x1, y1, z1).color(r, g, b, a);
+            bufferBuilder.vertex(x0, y1, z1).color(r, g, b, a);
+
+            // West (X-)
+            bufferBuilder.vertex(x0, y0, z0).color(r, g, b, a);
+            bufferBuilder.vertex(x0, y0, z1).color(r, g, b, a);
+            bufferBuilder.vertex(x0, y1, z1).color(r, g, b, a);
+            bufferBuilder.vertex(x0, y1, z0).color(r, g, b, a);
+
+            // East (X+)
+            bufferBuilder.vertex(x1, y0, z0).color(r, g, b, a);
+            bufferBuilder.vertex(x1, y1, z0).color(r, g, b, a);
+            bufferBuilder.vertex(x1, y1, z1).color(r, g, b, a);
+            bufferBuilder.vertex(x1, y0, z1).color(r, g, b, a);
+        }
+
+        BuiltBuffer builtBuffer = bufferBuilder.endNullable();
+        if (builtBuffer == null) return;
+
+        GpuBuffer vertexBuffer = null;
+        try {
+            int indexCount = builtBuffer.getDrawParameters().indexCount();
+            vertexBuffer = RenderSystem.getDevice()
+                    .createBuffer(() -> "glow vertex buffer", GpuBuffer.USAGE_VERTEX, builtBuffer.getBuffer());
+
+            Vec3d camPos = mc.gameRenderer.getCamera().getCameraPos();
+            Matrix4fStack matrix4fStack = RenderSystem.getModelViewStack();
+            GpuTextureView colorView = mc.getFramebuffer().getColorAttachmentView();
+            GpuTextureView depthView = mc.getFramebuffer().getDepthAttachmentView();
+
+            matrix4fStack.pushMatrix();
+            matrix4fStack.translate((float) -camPos.x, (float) -camPos.y, (float) -camPos.z);
+
+            GpuBufferSlice[] uniforms = RenderSystem.getDynamicUniforms().writeTransforms(
+                    new DynamicUniforms.TransformsValue(
+                            new Matrix4f(matrix4fStack),
+                            new Vector4f(1f, 1f, 1f, 1f),
+                            new Vector3f(),
+                            new Matrix4f()
+                    )
+            );
+
+            RenderSystem.setShaderFog(uniforms[0]);
+            GpuBuffer indexBuffer = RenderSystem.getSequentialBuffer(VertexFormat.DrawMode.QUADS).getIndexBuffer(indexCount);
+
+            GL11.glDisable(GL11.GL_DEPTH_TEST);
+            GL11.glDisable(GL11.GL_CULL_FACE);
+            try (RenderPass renderPass = RenderSystem.getDevice()
+                    .createCommandEncoder()
+                    .createRenderPass(() -> "glow", colorView, OptionalInt.empty(), depthView, OptionalDouble.empty())) {
+
+                RenderSystem.bindDefaultUniforms(renderPass);
+                renderPass.setVertexBuffer(0, vertexBuffer);
+                renderPass.setIndexBuffer(indexBuffer, RenderSystem.getSequentialBuffer(VertexFormat.DrawMode.QUADS).getIndexType());
+                renderPass.setUniform("DynamicTransforms", uniforms[0]);
+                renderPass.setPipeline(RenderPipelines.DEBUG_QUADS); // alpha blended, no texture
+                renderPass.drawIndexed(0, 0, indexCount, 1);
+            }
+            GL11.glEnable(GL11.GL_DEPTH_TEST);
+            GL11.glEnable(GL11.GL_CULL_FACE);
+            matrix4fStack.popMatrix();
+            builtBuffer.close();
+        } catch (Exception e) {
+            builtBuffer.close();
+        } finally {
+            if (vertexBuffer != null) vertexBuffer.close();
+        }
+    }
+
     private static void addLine(BufferBuilder buf,
                                 float x1, float y1, float z1,
                                 float x2, float y2, float z2,
@@ -195,32 +305,80 @@ public class RenderCallback {
         return camera.getCameraPos();
     }
 
+    private static List<Vec3d> computeVeinCenters(List<PosColor> queue) {
+        List<List<PosColor>> veins = new ArrayList<>();
+        boolean[] visited = new boolean[queue.size()];
+
+        for (int i = 0; i < queue.size(); i++) {
+            if (visited[i]) continue;
+
+            List<PosColor> vein = new ArrayList<>();
+            Queue<Integer> flood = new LinkedList<>();
+            flood.add(i);
+            visited[i] = true;
+
+            // BFS flood fill to group adjacent blocks
+            while (!flood.isEmpty()) {
+                int idx = flood.poll();
+                vein.add(queue.get(idx));
+
+                for (int j = 0; j < queue.size(); j++) {
+                    if (visited[j]) continue;
+                    BlockPos a = queue.get(idx).pos;
+                    BlockPos b = queue.get(j).pos;
+                    int manhattan = Math.abs(a.getX() - b.getX())
+                            + Math.abs(a.getY() - b.getY())
+                            + Math.abs(a.getZ() - b.getZ());
+                    if (manhattan <= 1) {
+                        visited[j] = true;
+                        flood.add(j);
+                    }
+                }
+            }
+            veins.add(vein);
+        }
+
+        // Average each vein into a single center point
+        List<Vec3d> centers = new ArrayList<>();
+        for (List<PosColor> vein : veins) {
+            double ax = 0, ay = 0, az = 0;
+            for (PosColor pc : vein) {
+                ax += pc.pos.getX() + 0.5;
+                ay += pc.pos.getY() + 0.5;
+                az += pc.pos.getZ() + 0.5;
+            }
+            centers.add(new Vec3d(ax / vein.size(), ay / vein.size(), az / vein.size()));
+        }
+        return centers;
+    }
+
     public static void renderTracers() {
         if (tracerQueue.isEmpty()) return;
+        if (!Config.showTracers.get()) return;
         MinecraftClient mc = MinecraftClient.getInstance();
         if (mc.player == null) return;
 
         Vec3d origin = getTracerOrigin(mc.getRenderTickCounter().getTickProgress(true));
         Vec3d camOffset = getCameraPos().negate();
 
+        List<Vec3d> veinCenters = computeVeinCenters(new ArrayList<>(tracerQueue));
+
         BufferBuilder bufferBuilder = Tessellator.getInstance().begin(
                 RenderPipelines.LINES.getVertexFormatMode(),
                 RenderPipelines.LINES.getVertexFormat()
         );
 
-        for (PosColor pc : tracerQueue) {
-            float r = pc.R(), g = pc.G(), b = pc.B(), a = pc.A();
+        float sx = (float)(origin.x + camOffset.x);
+        float sy = (float)(origin.y + camOffset.y);
+        float sz = (float)(origin.z + camOffset.z);
 
-            // Start: origin with camera offset applied
-            float sx = (float)(origin.x + camOffset.x);
-            float sy = (float)(origin.y + camOffset.y);
-            float sz = (float)(origin.z + camOffset.z);
+        PosColor rep = tracerQueue.get(0);
+        float r = rep.R(), g = rep.G(), b = rep.B(), a = rep.A();
 
-            // End: block center with camera offset applied
-            float ex = (float)(pc.pos.getX() + 0.5 + camOffset.x);
-            float ey = (float)(pc.pos.getY() + 0.5 + camOffset.y);
-            float ez = (float)(pc.pos.getZ() + 0.5 + camOffset.z);
-
+        for (Vec3d center : veinCenters) {
+            float ex = (float)(center.x + camOffset.x);
+            float ey = (float)(center.y + camOffset.y);
+            float ez = (float)(center.z + camOffset.z);
             addLine(bufferBuilder, sx, sy, sz, ex, ey, ez, r, g, b, a);
         }
 
@@ -236,7 +394,6 @@ public class RenderCallback {
             GpuTextureView colorView = mc.getFramebuffer().getColorAttachmentView();
             GpuTextureView depthView = mc.getFramebuffer().getDepthAttachmentView();
 
-            // No translate on the matrix this time — offset is baked into vertices
             matrix4fStack.pushMatrix();
 
             GpuBufferSlice[] uniforms = RenderSystem.getDynamicUniforms().writeTransforms(

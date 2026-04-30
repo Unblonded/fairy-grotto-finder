@@ -8,6 +8,8 @@ public class ImGuiThemes{
     public static void cyberpunk() {
         ImGuiStyle style = ImGui.getStyle();
 
+        ImGui.styleColorsDark();
+
         style.setWindowPadding(12, 12); 
         style.setFramePadding(8, 6);    
         style.setItemSpacing(8, 6);     
@@ -112,6 +114,39 @@ public class ImGuiThemes{
         style.setColor(ImGuiCol.PlotLinesHovered, plasmaPink.x, plasmaPink.y, plasmaPink.z, 1.00f);
         style.setColor(ImGuiCol.PlotHistogram, electricCyan.x, electricCyan.y, electricCyan.z, 0.90f);
         style.setColor(ImGuiCol.PlotHistogramHovered, voidPurple.x, voidPurple.y, voidPurple.z, 1.00f);
+
+        style.setAlpha(0.97f);
+    }
+
+    static void simple() {
+        ImGuiStyle style = ImGui.getStyle();
+
+        ImGui.styleColorsDark();
+
+        style.setWindowPadding(12, 12);
+        style.setFramePadding(8, 6);
+        style.setItemSpacing(8, 6);
+        style.setItemInnerSpacing(6, 6);
+        style.setTouchExtraPadding(2, 2);
+        style.setIndentSpacing(20.0f);
+        style.setScrollbarSize(14.0f);
+        style.setGrabMinSize(12.0f);
+        style.setTabMinWidthForCloseButton(0.0f);
+
+        style.setWindowRounding(6.0f);
+        style.setChildRounding(5.0f);
+        style.setFrameRounding(5.0f);
+        style.setPopupRounding(6.0f);
+        style.setScrollbarRounding(10.0f);
+        style.setGrabRounding(4.0f);
+        style.setTabRounding(5.0f);
+        style.setWindowTitleAlign(0.5f, 0.5f);
+
+        style.setWindowBorderSize(1.0f);
+        style.setChildBorderSize(1.0f);
+        style.setPopupBorderSize(1.0f);
+        style.setFrameBorderSize(1.0f);
+        style.setTabBorderSize(1.0f);
 
         style.setAlpha(0.97f);
     }

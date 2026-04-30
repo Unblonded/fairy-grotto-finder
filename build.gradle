@@ -6,7 +6,9 @@ plugins {
 version = project.mod_version
 group = project.maven_group
 
-repositories { }
+repositories {
+    maven { url 'https://jitpack.io' }
+}
 
 dependencies {
 	minecraft "com.mojang:minecraft:${project.minecraft_version}"
@@ -20,7 +22,6 @@ dependencies {
         exclude group: "org.lwjgl"
         exclude group: "org.lwjgl.lwjgl"
     }
-
     //include implementation("io.github.spair:imgui-java-natives-macos:${project.imgui_version}")
     include implementation("io.github.spair:imgui-java-natives-windows:${project.imgui_version}")
 }

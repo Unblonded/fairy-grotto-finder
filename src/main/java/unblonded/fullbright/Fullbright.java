@@ -15,7 +15,8 @@ public class Fullbright implements ClientModInitializer {
         Keybinds.onInitializeClient();
 
         WorldRenderEvents.END_MAIN.register(ctx -> {
-            RenderCallback.renderBlockOutline();
+            if (!Config.drawMode.get()) RenderCallback.renderBlockOutline();
+            else                        RenderCallback.renderGlow();
             RenderCallback.renderTracers();
         });
     }
