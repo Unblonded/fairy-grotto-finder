@@ -1,3 +1,3 @@
 # fullbright
 
-implementation not determined yet
+PRESS G TO OPEN THE GUI
