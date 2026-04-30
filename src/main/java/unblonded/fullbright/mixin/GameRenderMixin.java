@@ -24,8 +24,12 @@ public class GameRenderMixin {
 
         Config.showMenu = Fullbright.client.currentScreen instanceof GuiBackground;
         Config.showAll = Fullbright.client.world != null;
+        float fontSize = Math.max(1.1f, (ImGui.getIO().getDisplaySize().x / 1920.0f) * 0.85f);
 
         if (Config.fontSizeOverride.get()) ImGui.getIO().setFontGlobalScale(Config.fontSize[0]);
-        else ImGui.getIO().setFontGlobalScale(Math.max(1.1f, (ImGui.getIO().getDisplaySize().x / 1920.0f) * 0.85f));
+        else {
+            ImGui.getIO().setFontGlobalScale(fontSize);
+            Config.fontSize[0] = fontSize;
+        }
     }
 }

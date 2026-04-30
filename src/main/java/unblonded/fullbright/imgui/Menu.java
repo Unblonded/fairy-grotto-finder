@@ -144,7 +144,8 @@ public class Menu {
                 ImGui.setNextItemWidth(200);
                 ImGui.combo("##theme", themeRef, themes, themes.length);
                 ImGui.spacing();
-                ImGui.text("More settings coming soon...");
+                ImGui.text("Font Size");
+                ImGui.sliderFloat("##fontsize", Config.fontSize, 5f, 30f, "%.1f");
                 ImGui.endTabItem();
             }
 

@@ -1,5 +1,6 @@
 package unblonded.fullbright;
 
+import imgui.ImGui;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.rendering.v1.world.WorldRenderEvents;
 import net.minecraft.client.MinecraftClient;
@@ -15,9 +16,11 @@ public class Fullbright implements ClientModInitializer {
         Keybinds.onInitializeClient();
 
         WorldRenderEvents.END_MAIN.register(ctx -> {
-            if (!Config.drawMode.get()) RenderCallback.renderBlockOutline();
-            else                        RenderCallback.renderGlow();
-            RenderCallback.renderTracers();
+            if (client.world != null) {
+                if (!Config.drawMode.get()) RenderCallback.renderBlockOutline();
+                else RenderCallback.renderGlow();
+                RenderCallback.renderTracers();
+            }
         });
     }
 }

@@ -49,11 +49,6 @@ public final class ImGuiImpl {
 
         imGuiImplGlfw.init(handle, true);
         imGuiImplGl3.init();
-
-        GLFW.glfwSetWindowCloseCallback(handle, window -> {
-            dispose();
-            GLFW.glfwSetWindowShouldClose(window, true);
-        });
     }
 
     public static void beginImGuiRendering() {
