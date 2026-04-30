@@ -3,14 +3,10 @@
 	"id": "fullbright",
 	"version": "${version}",
 	"name": "fullbright",
-	"description": "This is an example description! Tell everyone what your mod is about!",
+	"description": "You downloaded this mod exactly knowing what it does, it's a mod fullbright, obviously.",
 	"authors": [
-		"Me!"
+		"Unblonded"
 	],
-	"contact": {
-		"homepage": "https://fabricmc.net/",
-		"sources": "https://github.com/FabricMC/fabric-example-mod"
-	},
 	"license": "CC0-1.0",
 	"icon": "assets/fullbright/icon.png",
 	"environment": "*",
