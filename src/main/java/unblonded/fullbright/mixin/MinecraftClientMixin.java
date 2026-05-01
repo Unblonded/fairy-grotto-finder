@@ -10,6 +10,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import unblonded.fullbright.imgui.ImGuiImpl;
+import unblonded.fullbright.util.ConfigManager;
 
 @Mixin(MinecraftClient.class)
 public class MinecraftClientMixin {
@@ -19,8 +20,12 @@ public class MinecraftClientMixin {
     private Window window;
 
     @Inject(method = "<init>", at = @At("RETURN"))
-    public void initImGui(RunArgs args, CallbackInfo ci) { ImGuiImpl.create(window.getHandle()); }
+    public void initImGui(RunArgs args, CallbackInfo ci) {
+        ImGuiImpl.create(window.getHandle());
+    }
 
     @Inject(method = "close", at = @At("HEAD"))
-    public void closeImGui(CallbackInfo ci) { ImGuiImpl.dispose(); }
+    public void closeImGui(CallbackInfo ci) {
+        ImGuiImpl.dispose();
+    }
 }

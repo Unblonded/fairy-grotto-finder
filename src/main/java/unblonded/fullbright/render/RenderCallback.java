@@ -222,7 +222,7 @@ public class RenderCallback {
             GpuBuffer indexBuffer = RenderSystem.getSequentialBuffer(VertexFormat.DrawMode.QUADS).getIndexBuffer(indexCount);
 
             GL11.glDisable(GL11.GL_DEPTH_TEST);
-            GL11.glDisable(GL11.GL_CULL_FACE);
+            //GL11.glDisable(GL11.GL_CULL_FACE);
             try (RenderPass renderPass = RenderSystem.getDevice()
                     .createCommandEncoder()
                     .createRenderPass(() -> "glow", colorView, OptionalInt.empty(), depthView, OptionalDouble.empty())) {
@@ -231,7 +231,7 @@ public class RenderCallback {
                 renderPass.setVertexBuffer(0, vertexBuffer);
                 renderPass.setIndexBuffer(indexBuffer, RenderSystem.getSequentialBuffer(VertexFormat.DrawMode.QUADS).getIndexType());
                 renderPass.setUniform("DynamicTransforms", uniforms[0]);
-                renderPass.setPipeline(RenderPipelines.DEBUG_QUADS); // alpha blended, no texture
+                renderPass.setPipeline(RenderPipelines.DEBUG_FILLED_BOX); // alpha blended, no texture
                 renderPass.drawIndexed(0, 0, indexCount, 1);
             }
             GL11.glEnable(GL11.GL_DEPTH_TEST);
@@ -373,7 +373,8 @@ public class RenderCallback {
         float sz = (float)(origin.z + camOffset.z);
 
         PosColor rep = tracerQueue.get(0);
-        float r = rep.R(), g = rep.G(), b = rep.B(), a = rep.A();
+        //float r = rep.R(), g = rep.G(), b = rep.B(), a = rep.A();
+        float r = activeColor.R(), g = activeColor.G(), b = activeColor.B(), a = activeColor.A();
 
         for (Vec3d center : veinCenters) {
             float ex = (float)(center.x + camOffset.x);

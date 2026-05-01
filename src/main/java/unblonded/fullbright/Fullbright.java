@@ -5,7 +5,10 @@ import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.rendering.v1.world.WorldRenderEvents;
 import net.minecraft.client.MinecraftClient;
 import unblonded.fullbright.render.RenderCallback;
+import unblonded.fullbright.util.ConfigManager;
 import unblonded.fullbright.util.Keybinds;
+
+import java.io.File;
 
 public class Fullbright implements ClientModInitializer {
     public static MinecraftClient client;
@@ -22,5 +25,11 @@ public class Fullbright implements ClientModInitializer {
                 RenderCallback.renderTracers();
             }
         });
+
+        ConfigManager.loadConfig();
+    }
+
+    public static File workDir() {
+        return new File(client.runDirectory, "unblonded");
     }
 }

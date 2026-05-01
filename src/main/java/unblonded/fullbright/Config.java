@@ -15,7 +15,7 @@ public class Config {
 
     public static final List<BlockPos> scanLog = new CopyOnWriteArrayList<>();
 
-    public static Color scanColor = new Color(1f, 0.03f, 0.85f, 1f);
+    public static float[] scanColor = {1f, 0.03f, 0.85f, 1f};
     public static int[] scanRadius = {20};
     public static ImBoolean showTracers = new ImBoolean(true);
     public static ImBoolean showOutlines = new ImBoolean(true);

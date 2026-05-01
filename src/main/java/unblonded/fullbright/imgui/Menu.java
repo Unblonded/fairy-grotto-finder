@@ -11,7 +11,6 @@ import unblonded.fullbright.render.RenderCallback;
 import unblonded.fullbright.util.Color;
 
 public class Menu {
-    private static float[] colorBuffer = Config.scanColor.asFloatArr();
     private static final String[] themes = {"Cyberpunk", "Simple"};
     private static ImInt themeRef = new ImInt(1);
     private static int lastTheme = -1;
@@ -35,11 +34,11 @@ public class Menu {
                 // Color picker
                 ImGui.text("Highlight Color");
                 ImGui.sameLine();
-                ImGui.colorEdit4("##color", colorBuffer,
+                ImGui.colorEdit4("##color", Config.scanColor,
                         imgui.flag.ImGuiColorEditFlags.NoLabel |
                                 imgui.flag.ImGuiColorEditFlags.AlphaBar | imgui.flag.ImGuiColorEditFlags.NoInputs);
 
-                Color newColor = new Color(colorBuffer[0], colorBuffer[1], colorBuffer[2], colorBuffer[3]);
+                Color newColor = new Color(Config.scanColor[0], Config.scanColor[1], Config.scanColor[2], Config.scanColor[3]);
                 if (!newColor.equals(RenderCallback.activeColor)) RenderCallback.activeColor = newColor;
 
                 // Radius slider
@@ -64,7 +63,7 @@ public class Menu {
                 if (ImGui.button(icons.MAGNIFYING_GLASS + "  Scan Grotto", btnW, 0)) {
                     RenderCallback.clearQueue();
                     RenderCallback.clearTracers();
-                    BlockScanner.scan("minecraft:magenta_stained_glass_pane", Config.scanColor, Config.scanRadius[0])
+                    BlockScanner.scan("minecraft:magenta_stained_glass_pane", new Color(Config.scanColor), Config.scanRadius[0])
                             .execute().await()
                             .forEach(pc -> {
                                 RenderCallback.addToQueue(pc);
@@ -145,7 +144,9 @@ public class Menu {
                 ImGui.combo("##theme", themeRef, themes, themes.length);
                 ImGui.spacing();
                 ImGui.text("Font Size");
-                ImGui.sliderFloat("##fontsize", Config.fontSize, 5f, 30f, "%.1f");
+                ImGui.checkbox("##overridefontsize", Config.fontSizeOverride);
+                ImGui.sameLine();
+                ImGui.sliderFloat("##fontsize", Config.fontSize, 0.1f, 3f, "%.1f");
                 ImGui.endTabItem();
             }
 

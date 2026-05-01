@@ -10,6 +10,7 @@ import unblonded.fullbright.Fullbright;
 import unblonded.fullbright.BlockScanner;
 import unblonded.fullbright.render.RenderCallback;
 import unblonded.fullbright.util.Color;
+import unblonded.fullbright.util.ConfigManager;
 import unblonded.fullbright.util.GuiBackground;
 import unblonded.fullbright.util.Keybinds;
 
@@ -25,5 +26,7 @@ public class TickMixin {
 
         if (Keybinds.openGui.wasPressed())
             client.setScreen(new GuiBackground());
+
+        if (tick % 200 == 0) ConfigManager.saveConfig();
     }
 }
