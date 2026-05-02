@@ -26,6 +26,8 @@ public class BlockScanner {
             }
     );
 
+    public static final List<BlockPos> logs = new CopyOnWriteArrayList<>();
+
     public static ScanTask scan(String blockId, Color color, int radiusChunks) {
         return new ScanTask(blockId, color, radiusChunks);
     }
@@ -48,7 +50,7 @@ public class BlockScanner {
         /** Kicks off the scan asynchronously and returns itself for chaining. */
         public ScanTask execute() {
             MinecraftClient mc = MinecraftClient.getInstance();
-            Config.scanLog.clear();
+            BlockScanner.logs.clear();
             if (mc.player == null || mc.world == null) {
                 done = true;
                 return this;
@@ -120,7 +122,7 @@ public class BlockScanner {
                         if (chunk.getBlockState(pos).getBlock() == target) {
                             PosColor found = new PosColor(pos, color);
                             results.add(found);
-                            Config.scanLog.add(found.pos);
+                            BlockScanner.logs.add(found.pos);
                         }
                     }
                 }

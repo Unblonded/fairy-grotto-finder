@@ -3,7 +3,6 @@ package unblonded.fullbright.imgui;
 import imgui.*;
 import imgui.flag.ImGuiWindowFlags;
 import imgui.flag.ImGuiTabBarFlags;
-import imgui.type.ImInt;
 import net.minecraft.util.math.BlockPos;
 import unblonded.fullbright.BlockScanner;
 import unblonded.fullbright.Config;
@@ -12,7 +11,6 @@ import unblonded.fullbright.util.Color;
 
 public class Menu {
     private static final String[] themes = {"Cyberpunk", "Simple"};
-    private static ImInt themeRef = new ImInt(1);
     private static int lastTheme = -1;
 
     public static void render() {
@@ -76,7 +74,7 @@ public class Menu {
                 if (ImGui.button(icons.TRASH + "  Clear", btnW, 0)) {
                     RenderCallback.clearQueue();
                     RenderCallback.clearTracers();
-                    Config.scanLog.clear();
+                    BlockScanner.logs.clear();
                 }
 
                 ImGui.spacing();
@@ -84,21 +82,21 @@ public class Menu {
             }
 
             // ── Results tab ──────────────────────────────────────────
-            if (ImGui.beginTabItem(icons.LIST + "  Results (" + Config.scanLog.size() + ")")) {
+            if (ImGui.beginTabItem(icons.LIST + "  Results (" + BlockScanner.logs.size() + ")")) {
                 ImGui.spacing();
 
-                if (Config.scanLog.isEmpty()) {
+                if (BlockScanner.logs.isEmpty()) {
                     ImGui.textDisabled("No results yet — run a scan first.");
                 } else {
-                    ImGui.textDisabled(Config.scanLog.size() + " blocks found");
+                    ImGui.textDisabled(BlockScanner.logs.size() + " blocks found");
                     ImGui.separator();
                     ImGui.spacing();
 
                     float bottomReserved = ImGui.getFrameHeightWithSpacing() + ImGui.getStyle().getItemSpacingY() + 4;
                     ImGui.beginChild("##scanlog_scroll", 0, ImGui.getContentRegionAvailY() - bottomReserved, false);
 
-                    for (int i = 0; i < Config.scanLog.size(); i++) {
-                        BlockPos pos = Config.scanLog.get(i);
+                    for (int i = 0; i < BlockScanner.logs.size(); i++) {
+                        BlockPos pos = BlockScanner.logs.get(i);
 
                         if (i % 2 == 0) {
                             ImVec2 cp = ImGui.getCursorScreenPos();
@@ -130,7 +128,7 @@ public class Menu {
 
                     ImGui.separator();
                     if (ImGui.button(icons.TRASH + "  Clear Results", -1, 0))
-                        Config.scanLog.clear();
+                        BlockScanner.logs.clear();
                 }
 
                 ImGui.spacing();
@@ -141,7 +139,7 @@ public class Menu {
             if (ImGui.beginTabItem(icons.GEAR + "  Settings")) {
                 ImGui.text("Themes");
                 ImGui.setNextItemWidth(200);
-                ImGui.combo("##theme", themeRef, themes, themes.length);
+                ImGui.combo("##theme", Config.themeRef, themes, themes.length);
                 ImGui.spacing();
                 ImGui.text("Font Size");
                 ImGui.checkbox("##overridefontsize", Config.fontSizeOverride);
@@ -152,8 +150,8 @@ public class Menu {
 
             ImGui.endTabBar();
 
-            if (themeRef.get() != lastTheme) {
-                lastTheme = themeRef.get();
+            if (Config.themeRef.get() != lastTheme) {
+                lastTheme = Config.themeRef.get();
                 switch (lastTheme) {
                     case 0 -> ImGuiThemes.cyberpunk();
                     case 1 -> ImGuiThemes.simple();
