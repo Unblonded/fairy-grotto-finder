@@ -9,7 +9,6 @@
     "requireAnnotations": true
   },
   "client": [
-    "TextMixin",
     "GameRenderMixin",
     "MinecraftClientMixin",
     "TickMixin"
